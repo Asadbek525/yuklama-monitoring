@@ -131,9 +131,16 @@ export class WorkloadLineChartComponent {
         },
       },
       legend: {
-        data: ['Aerob yuklama', 'Aralash yuklama', 'Anaerob yuklama', 'Sakrashlar'],
+        data: [
+          'Aerob yuklama',
+          'Aralash yuklama',
+          'Anaerob yuklama',
+          'Sakrashlar',
+          { name: 'Sport o\'yinlari', icon: 'roundRect' },
+          { name: 'Maxsus kuch mashqlari', icon: 'roundRect' },
+        ],
         top: 0,
-        itemGap: 15,
+        itemGap: 12,
         textStyle: {
           fontSize: 11,
         },
@@ -202,7 +209,7 @@ export class WorkloadLineChartComponent {
         inRange: {
           color: ['#fed7aa', '#f97316', '#e9d5ff', '#a855f7'], // light orange, orange, light lilac, lilac
         },
-        seriesIndex: 4,
+        seriesIndex: 6,
       },
       series: [
         {
@@ -265,6 +272,22 @@ export class WorkloadLineChartComponent {
           symbolSize: 6,
           showSymbol: false,
           emphasis: { focus: 'series' },
+        },
+        {
+          name: 'Sport o\'yinlari',
+          type: 'line',
+          data: [],
+          itemStyle: { color: '#f97316' },
+          lineStyle: { width: 0 },
+          symbol: 'none',
+        },
+        {
+          name: 'Maxsus kuch mashqlari',
+          type: 'line',
+          data: [],
+          itemStyle: { color: '#a855f7' },
+          lineStyle: { width: 0 },
+          symbol: 'none',
         },
         {
           name: 'Activity',
