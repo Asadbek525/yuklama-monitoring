@@ -1,14 +1,34 @@
-import {ApplicationConfig, provideBrowserGlobalErrorListeners} from '@angular/core';
-import {provideRouter} from '@angular/router';
+import { ApplicationConfig, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { provideRouter } from '@angular/router';
 
-import {routes} from './app.routes';
-import {provideEchartsCore} from 'ngx-echarts';
+import { routes } from './app.routes';
+import { provideEchartsCore } from 'ngx-echarts';
 import * as echarts from 'echarts/core';
-import {BarChart} from 'echarts/charts';
-import {GridComponent} from 'echarts/components';
-import {CanvasRenderer} from 'echarts/renderers';
+import { BarChart, LineChart, HeatmapChart, ScatterChart, PieChart } from 'echarts/charts';
+import {
+  GridComponent,
+  LegendComponent,
+  TooltipComponent,
+  DataZoomComponent,
+  VisualMapComponent,
+  MarkLineComponent,
+} from 'echarts/components';
+import { CanvasRenderer } from 'echarts/renderers';
 
-echarts.use([BarChart, GridComponent, CanvasRenderer])
+echarts.use([
+  BarChart,
+  LineChart,
+  HeatmapChart,
+  ScatterChart,
+  PieChart,
+  GridComponent,
+  LegendComponent,
+  TooltipComponent,
+  DataZoomComponent,
+  VisualMapComponent,
+  MarkLineComponent,
+  CanvasRenderer,
+]);
 
 export const appConfig: ApplicationConfig = {
   providers: [

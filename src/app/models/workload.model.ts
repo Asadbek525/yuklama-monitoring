@@ -6,3 +6,10 @@ export interface WorkloadData {
   sport: number[];
   maxsus: number[];
 }
+
+export interface GroupData {
+  id: string;
+  name: string;
+  data: WorkloadData;
+}
+
