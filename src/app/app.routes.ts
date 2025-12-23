@@ -1,9 +1,3 @@
-import { Routes } from '@angular/router';
-import {Test} from './pages/test/test';
+import {Routes} from '@angular/router';
 
-export const routes: Routes = [
-  {
-    path: 'test',
-    component: Test
-  }
-];
+export const routes: Routes = [];

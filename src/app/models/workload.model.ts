@@ -1,4 +1,4 @@
-export interface YuklamaData {
+export interface WorkloadData {
   aerob: number[];
   aralash: number[];
   anaerob: number[];
