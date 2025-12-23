@@ -71,7 +71,7 @@ function getMonthBoundaries(): number[] {
     <div
       echarts
       [options]="chartOptions()"
-      class="h-[480px] w-full"
+      class="h-[580px] w-full"
       aria-label="52 hafta davomida aerob, aralash, anaerob va sakrash qiymatlarini ko'rsatuvchi yuklama chiziqli grafigi"
       role="img"
     ></div>

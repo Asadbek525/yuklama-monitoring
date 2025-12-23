@@ -31,7 +31,9 @@ import { WorkloadPieChartComponent } from '../../shared/components/workload-pie-
           </select>
           <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3">
             <svg class="h-5 w-5 text-gray-400" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true">
-              <path fill-rule="evenodd" d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" />
+              <path fill-rule="evenodd"
+                    d="M5.22 8.22a.75.75 0 0 1 1.06 0L10 11.94l3.72-3.72a.75.75 0 1 1 1.06 1.06l-4.25 4.25a.75.75 0 0 1-1.06 0L5.22 9.28a.75.75 0 0 1 0-1.06Z"
+                    clip-rule="evenodd"/>
             </svg>
           </div>
         </div>
@@ -39,12 +41,9 @@ import { WorkloadPieChartComponent } from '../../shared/components/workload-pie-
 
       <section class="mb-4 rounded-lg bg-white p-4 shadow">
         <h2 class="mb-2 text-lg font-semibold text-gray-800">Mashg'ulot yuklama</h2>
-        <app-workload-line-chart [data]="selectedGroup().data" />
-      </section>
-
-      <section class="rounded-lg bg-white p-4 shadow">
+        <app-workload-line-chart [data]="selectedGroup().data"/>
         <h2 class="mb-2 text-lg font-semibold text-gray-800">Yuklama taqsimoti</h2>
-        <app-workload-pie-chart [data]="selectedGroup().data" />
+        <app-workload-pie-chart [data]="selectedGroup().data"/>
       </section>
     </div>
   `,
