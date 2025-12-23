@@ -12,14 +12,14 @@ import * as stg2 from './stg-2';
 export const groups: GroupData[] = [
   {
     id: 'stg-1',
-    name: '1-Guruh',
+    name: 'STG-1',
     data: {
       ...stg1
     },
   },
   {
     id: 'stg-2',
-    name: '2-Guruh',
+    name: 'STG-2',
     data: {
       ...stg2
     },
