@@ -5,29 +5,50 @@ import { WorkloadData } from '../../models/workload.model';
 
 // Month distribution: Sept(4), Oct(5), Nov(4), Dec(4), Jan(5), Feb(4), Mar(4), Apr(4), May(5), Jun(4), Jul(5), Aug(4)
 const MONTHS = [
-  { name: 'Sentyabr', weeks: 4 },
-  { name: 'Oktyabr', weeks: 5 },
-  { name: 'Noyabr', weeks: 4 },
-  { name: 'Dekabr', weeks: 4 },
-  { name: 'Yanvar', weeks: 5 },
-  { name: 'Fevral', weeks: 4 },
-  { name: 'Mart', weeks: 4 },
-  { name: 'Aprel', weeks: 4 },
+  { name: 'Sen', weeks: 4 },
+  { name: 'Okt', weeks: 5 },
+  { name: 'Noy', weeks: 4 },
+  { name: 'Dek', weeks: 4 },
+  { name: 'Yan', weeks: 5 },
+  { name: 'Fev', weeks: 4 },
+  { name: 'Mar', weeks: 4 },
+  { name: 'Apr', weeks: 4 },
   { name: 'May', weeks: 5 },
-  { name: 'Iyun', weeks: 4 },
-  { name: 'Iyul', weeks: 5 },
-  { name: 'Avgust', weeks: 4 },
+  { name: 'Iyn', weeks: 4 },
+  { name: 'Iyl', weeks: 5 },
+  { name: 'Avg', weeks: 4 },
+];
+
+const MONTHS_FULL = [
+  'Sentyabr', 'Oktyabr', 'Noyabr', 'Dekabr', 'Yanvar', 'Fevral',
+  'Mart', 'Aprel', 'May', 'Iyun', 'Iyul', 'Avgust'
 ];
 
 function getMonthForWeek(weekIndex: number): string {
   let cumulative = 0;
-  for (const month of MONTHS) {
-    cumulative += month.weeks;
+  for (let i = 0; i < MONTHS.length; i++) {
+    cumulative += MONTHS[i].weeks;
     if (weekIndex < cumulative) {
-      return month.name;
+      return MONTHS_FULL[i];
     }
   }
-  return MONTHS[MONTHS.length - 1].name;
+  return MONTHS_FULL[MONTHS_FULL.length - 1];
+}
+
+function getWeekLabels(): string[] {
+  const labels: string[] = [];
+  let weekNum = 1;
+  for (const month of MONTHS) {
+    for (let i = 0; i < month.weeks; i++) {
+      if (i === 0) {
+        labels.push(`${month.name}`);
+      } else {
+        labels.push(`${weekNum}`);
+      }
+      weekNum++;
+    }
+  }
+  return labels;
 }
 
 function getMonthBoundaries(): number[] {
@@ -42,6 +63,13 @@ function getMonthBoundaries(): number[] {
   return boundaries;
 }
 
+// Convert binary sport/maxsus to hours (total 40h sport, 80h maxsus distributed across active weeks)
+function convertToHours(data: number[], totalHours: number): number[] {
+  const activeCount = data.filter(v => v === 1).length;
+  const hoursPerWeek = activeCount > 0 ? totalHours / activeCount : 0;
+  return data.map(v => v === 1 ? Number(hoursPerWeek.toFixed(1)) : 0);
+}
+
 @Component({
   selector: 'app-workload-line-chart',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -50,7 +78,7 @@ function getMonthBoundaries(): number[] {
     <div
       echarts
       [options]="chartOptions()"
-      class="h-[400px] w-full"
+      class="w-full"
       aria-label="52 hafta davomida aerob, aralash, anaerob va sakrash qiymatlarini ko'rsatuvchi yuklama chiziqli grafigi"
       role="img"
     ></div>
@@ -61,8 +89,12 @@ export class WorkloadLineChartComponent {
 
   readonly chartOptions = computed<EChartsOption>(() => {
     const workload = this.data();
-    const weeks = Array.from({ length: 52 }, (_, i) => `${i + 1}`);
+    const weekLabels = getWeekLabels();
     const monthBoundaries = getMonthBoundaries();
+
+    // Convert sport and maxsus to hours
+    const sportHours = convertToHours(workload.sport, 40);
+    const maxsusHours = convertToHours(workload.maxsus, 80);
 
     // Create mark lines for month boundaries
     const markLineData = monthBoundaries.map((weekIndex) => ({
@@ -84,58 +116,60 @@ export class WorkloadLineChartComponent {
           type: 'cross',
         },
         formatter: (params: unknown) => {
-          const p = params as Array<{ seriesName: string; value: number; dataIndex: number; color: string }>;
+          const p = params as Array<{ seriesName: string; value: number; dataIndex: number; color: string; axisIndex: number }>;
           const weekIndex = p[0].dataIndex;
           const week = weekIndex + 1;
           const month = getMonthForWeek(weekIndex);
           let result = `<strong>${month}, ${week}-hafta</strong><br/>`;
           p.forEach((item) => {
-            result += `<span style="color:${item.color}">●</span> ${item.seriesName}: <strong>${item.value} km</strong><br/>`;
+            const isHours = item.seriesName === 'Sport o\'yinlari' || item.seriesName === 'Maxsus kuch mashqlari';
+            const unit = isHours ? 'soat' : 'km';
+            result += `<span style="color:${item.color}">●</span> ${item.seriesName}: <strong>${item.value} ${unit}</strong><br/>`;
           });
           return result;
         },
       },
       legend: {
-        data: ['Aerob yuklama', 'Aralash yuklama', 'Anaerob yuklama', 'Sakrashlar'],
+        data: ['Aerob yuklama', 'Aralash yuklama', 'Anaerob yuklama', 'Sakrashlar', 'Sport o\'yinlari', 'Maxsus kuch mashqlari'],
         top: 0,
-        itemGap: 15,
+        itemGap: 10,
+        textStyle: {
+          fontSize: 11,
+        },
       },
       grid: {
-        left: '3%',
-        right: '4%',
-        bottom: '18%',
-        top: '12%',
+        left: '2%',
+        right: '2%',
+        bottom: '2%',
+        top: '5%',
         containLabel: true,
       },
       xAxis: {
         type: 'category',
         boundaryGap: false,
-        data: weeks,
-        name: 'Hafta',
-        nameLocation: 'middle',
-        nameGap: 30,
+        data: weekLabels,
         axisLabel: {
-          interval: 3,
+          interval: 0,
+          fontSize: 9,
+          rotate: 0,
         },
       },
-      yAxis: {
-        type: 'value',
-        name: 'Masofa (km)',
-        nameLocation: 'middle',
-        nameGap: 50,
-      },
-      dataZoom: [
+      yAxis: [
         {
-          type: 'slider',
-          start: 0,
-          end: 100,
-          bottom: 10,
-          height: 25,
+          type: 'value',
+          name: 'Masofa (km)',
+          nameLocation: 'middle',
+          nameGap: 45,
+          min: 0,
+          interval: 5,
         },
         {
-          type: 'inside',
-          start: 0,
-          end: 100,
+          type: 'value',
+          name: 'Vaqt (soat)',
+          nameLocation: 'middle',
+          nameGap: 45,
+          min: 0,
+          splitLine: { show: false },
         },
       ],
       series: [
@@ -144,6 +178,7 @@ export class WorkloadLineChartComponent {
           type: 'line',
           smooth: true,
           data: workload.aerob,
+          yAxisIndex: 0,
           lineStyle: { width: 2 },
           itemStyle: { color: '#22c55e' },
           symbol: 'circle',
@@ -163,6 +198,7 @@ export class WorkloadLineChartComponent {
           type: 'line',
           smooth: true,
           data: workload.aralash,
+          yAxisIndex: 0,
           lineStyle: { width: 2 },
           itemStyle: { color: '#eab308' },
           symbol: 'circle',
@@ -177,6 +213,7 @@ export class WorkloadLineChartComponent {
           type: 'line',
           smooth: true,
           data: workload.anaerob,
+          yAxisIndex: 0,
           lineStyle: { width: 2 },
           itemStyle: { color: '#ef4444' },
           symbol: 'circle',
@@ -191,8 +228,39 @@ export class WorkloadLineChartComponent {
           type: 'line',
           smooth: true,
           data: workload.sakrash,
+          yAxisIndex: 0,
           lineStyle: { width: 2 },
           itemStyle: { color: '#3b82f6' },
+          symbol: 'circle',
+          symbolSize: 6,
+          showSymbol: false,
+          emphasis: {
+            focus: 'series',
+          },
+        },
+        {
+          name: 'Sport o\'yinlari',
+          type: 'line',
+          data: sportHours,
+          yAxisIndex: 1,
+          smooth: true,
+          lineStyle: { width: 2 },
+          itemStyle: { color: '#f97316' },
+          symbol: 'circle',
+          symbolSize: 6,
+          showSymbol: false,
+          emphasis: {
+            focus: 'series',
+          },
+        },
+        {
+          name: 'Maxsus kuch mashqlari',
+          type: 'line',
+          data: maxsusHours,
+          yAxisIndex: 1,
+          smooth: true,
+          lineStyle: { width: 2 },
+          itemStyle: { color: '#a855f7' },
           symbol: 'circle',
           symbolSize: 6,
           showSymbol: false,
@@ -204,4 +272,3 @@ export class WorkloadLineChartComponent {
     };
   });
 }
-
