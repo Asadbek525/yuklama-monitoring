@@ -1,6 +1,7 @@
 ﻿import {GroupData} from '../src/app/models/workload.model';
 import * as stg1 from './stg-1';
 import * as stg2 from './stg-2';
+import * as osmg1 from './osmg-1';
 
 /**
  * Central barrel file for all group data.
@@ -12,16 +13,23 @@ import * as stg2 from './stg-2';
 export const groups: GroupData[] = [
   {
     id: 'stg-1',
-    name: 'STG-1',
+    name: 'Sport Mahoratini takomillashtirish bosqichi-1',
     data: {
       ...stg1
     },
   },
   {
     id: 'stg-2',
-    name: 'STG-2',
+    name: 'Sport Mahoratini takomillashtirish bosqichi-2',
     data: {
       ...stg2
+    },
+  },
+  {
+    id: 'osmg-1',
+    name: 'Oliy sport mahorati bosqichi-1',
+    data: {
+      ...osmg1
     },
   },
 ];

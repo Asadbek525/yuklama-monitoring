@@ -18,7 +18,7 @@ import { WorkloadPieChartComponent } from '../../shared/components/workload-pie-
         <label for="group-select" class="block text-sm font-medium text-gray-700 mb-1">
           Guruhni tanlang
         </label>
-        <div class="relative w-full max-w-xs">
+        <div class="relative w-full max-w-md">
           <select
             id="group-select"
             class="block w-full appearance-none rounded-lg border border-gray-300 bg-white px-4 py-2.5 pr-10 text-sm font-medium text-gray-700 shadow-sm transition-all hover:border-blue-400 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
