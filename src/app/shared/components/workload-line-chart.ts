@@ -63,13 +63,6 @@ function getMonthBoundaries(): number[] {
   return boundaries;
 }
 
-// Convert binary sport/maxsus to hours (total 40h sport, 80h maxsus distributed across active weeks)
-function convertToHours(data: number[], totalHours: number): number[] {
-  const activeCount = data.filter(v => v === 1).length;
-  const hoursPerWeek = activeCount > 0 ? totalHours / activeCount : 0;
-  return data.map(v => v === 1 ? Number(hoursPerWeek.toFixed(1)) : 0);
-}
-
 @Component({
   selector: 'app-workload-line-chart',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -78,7 +71,7 @@ function convertToHours(data: number[], totalHours: number): number[] {
     <div
       echarts
       [options]="chartOptions()"
-      class="w-full"
+      class="h-[480px] w-full"
       aria-label="52 hafta davomida aerob, aralash, anaerob va sakrash qiymatlarini ko'rsatuvchi yuklama chiziqli grafigi"
       role="img"
     ></div>
@@ -92,9 +85,11 @@ export class WorkloadLineChartComponent {
     const weekLabels = getWeekLabels();
     const monthBoundaries = getMonthBoundaries();
 
-    // Convert sport and maxsus to hours
-    const sportHours = convertToHours(workload.sport, 40);
-    const maxsusHours = convertToHours(workload.maxsus, 80);
+    // Create heatmap data for sport and maxsus
+    // Use different value ranges: Sport 0-1, Maxsus 2-3
+    const sportHeatmap: [number, number, number][] = workload.sport.map((v, i) => [i, 0, v]);
+    const maxsusHeatmap: [number, number, number][] = workload.maxsus.map((v, i) => [i, 1, v + 2]);
+    const heatmapData = [...sportHeatmap, ...maxsusHeatmap];
 
     // Create mark lines for month boundaries
     const markLineData = monthBoundaries.map((weekIndex) => ({
@@ -116,77 +111,113 @@ export class WorkloadLineChartComponent {
           type: 'cross',
         },
         formatter: (params: unknown) => {
-          const p = params as Array<{ seriesName: string; value: number; dataIndex: number; color: string; axisIndex: number }>;
+          const p = params as Array<{ seriesName: string; value: number | [number, number, number]; dataIndex: number; color: string; componentSubType: string }>;
           const weekIndex = p[0].dataIndex;
           const week = weekIndex + 1;
           const month = getMonthForWeek(weekIndex);
           let result = `<strong>${month}, ${week}-hafta</strong><br/>`;
           p.forEach((item) => {
-            const isHours = item.seriesName === 'Sport o\'yinlari' || item.seriesName === 'Maxsus kuch mashqlari';
-            const unit = isHours ? 'soat' : 'km';
-            result += `<span style="color:${item.color}">●</span> ${item.seriesName}: <strong>${item.value} ${unit}</strong><br/>`;
+            if (item.componentSubType === 'heatmap') {
+              const val = item.value as [number, number, number];
+              const name = val[1] === 0 ? 'Sport o\'yinlari' : 'Maxsus kuch mashqlari';
+              const isActive = val[1] === 0 ? val[2] === 1 : val[2] === 3;
+              const status = isActive ? '✓' : '✗';
+              result += `<span style="color:${item.color}">●</span> ${name}: ${status}<br/>`;
+            } else {
+              result += `<span style="color:${item.color}">●</span> ${item.seriesName}: <strong>${item.value} km</strong><br/>`;
+            }
           });
           return result;
         },
       },
       legend: {
-        data: ['Aerob yuklama', 'Aralash yuklama', 'Anaerob yuklama', 'Sakrashlar', 'Sport o\'yinlari', 'Maxsus kuch mashqlari'],
+        data: ['Aerob yuklama', 'Aralash yuklama', 'Anaerob yuklama', 'Sakrashlar'],
         top: 0,
-        itemGap: 10,
+        itemGap: 15,
         textStyle: {
           fontSize: 11,
         },
       },
-      grid: {
-        left: '2%',
-        right: '2%',
-        bottom: '2%',
-        top: '5%',
-        containLabel: true,
-      },
-      xAxis: {
-        type: 'category',
-        boundaryGap: false,
-        data: weekLabels,
-        axisLabel: {
-          interval: 0,
-          fontSize: 9,
-          rotate: 0,
+      grid: [
+        {
+          left: '3%',
+          right: '3%',
+          top: '8%',
+          height: '65%',
+          containLabel: true,
         },
-      },
+        {
+          left: '3%',
+          right: '3%',
+          top: '82%',
+          height: '12%',
+          containLabel: true,
+        },
+      ],
+      xAxis: [
+        {
+          type: 'category',
+          boundaryGap: false,
+          data: weekLabels,
+          gridIndex: 0,
+          axisLabel: {
+            interval: 0,
+            fontSize: 9,
+          },
+        },
+        {
+          type: 'category',
+          data: weekLabels,
+          gridIndex: 1,
+          axisLabel: { show: false },
+          axisTick: { show: false },
+          axisLine: { show: false },
+        },
+      ],
       yAxis: [
         {
           type: 'value',
-          name: 'Masofa (km)',
+          name: 'km',
           nameLocation: 'middle',
-          nameGap: 45,
+          nameGap: 35,
           min: 0,
           interval: 5,
+          gridIndex: 0,
         },
         {
-          type: 'value',
-          name: 'Vaqt (soat)',
-          nameLocation: 'middle',
-          nameGap: 45,
-          min: 0,
-          splitLine: { show: false },
+          type: 'category',
+          data: ['Sport o\'yinlari', 'Maxsus kuch mashqlari'],
+          gridIndex: 1,
+          axisLine: { show: false },
+          axisTick: { show: false },
+          axisLabel: {
+            fontSize: 9,
+          },
         },
       ],
+      visualMap: {
+        show: false,
+        min: 0,
+        max: 3,
+        inRange: {
+          color: ['#fed7aa', '#f97316', '#e9d5ff', '#a855f7'], // light orange, orange, light lilac, lilac
+        },
+        seriesIndex: 4,
+      },
       series: [
         {
           name: 'Aerob yuklama',
           type: 'line',
           smooth: true,
           data: workload.aerob,
+          xAxisIndex: 0,
           yAxisIndex: 0,
           lineStyle: { width: 2 },
           itemStyle: { color: '#22c55e' },
           symbol: 'circle',
           symbolSize: 6,
           showSymbol: false,
-          emphasis: {
-            focus: 'series',
-          },
+          emphasis: { focus: 'series' },
           markLine: {
             silent: true,
             symbol: 'none',
@@ -198,74 +229,53 @@ export class WorkloadLineChartComponent {
           type: 'line',
           smooth: true,
           data: workload.aralash,
+          xAxisIndex: 0,
           yAxisIndex: 0,
           lineStyle: { width: 2 },
           itemStyle: { color: '#eab308' },
           symbol: 'circle',
           symbolSize: 6,
           showSymbol: false,
-          emphasis: {
-            focus: 'series',
-          },
+          emphasis: { focus: 'series' },
         },
         {
           name: 'Anaerob yuklama',
           type: 'line',
           smooth: true,
           data: workload.anaerob,
+          xAxisIndex: 0,
           yAxisIndex: 0,
           lineStyle: { width: 2 },
           itemStyle: { color: '#ef4444' },
           symbol: 'circle',
           symbolSize: 6,
           showSymbol: false,
-          emphasis: {
-            focus: 'series',
-          },
+          emphasis: { focus: 'series' },
         },
         {
           name: 'Sakrashlar',
           type: 'line',
           smooth: true,
           data: workload.sakrash,
+          xAxisIndex: 0,
           yAxisIndex: 0,
           lineStyle: { width: 2 },
           itemStyle: { color: '#3b82f6' },
           symbol: 'circle',
           symbolSize: 6,
           showSymbol: false,
-          emphasis: {
-            focus: 'series',
-          },
+          emphasis: { focus: 'series' },
         },
         {
-          name: 'Sport o\'yinlari',
-          type: 'line',
-          data: sportHours,
+          name: 'Activity',
+          type: 'heatmap',
+          data: heatmapData,
+          xAxisIndex: 1,
           yAxisIndex: 1,
-          smooth: true,
-          lineStyle: { width: 2 },
-          itemStyle: { color: '#f97316' },
-          symbol: 'circle',
-          symbolSize: 6,
-          showSymbol: false,
-          emphasis: {
-            focus: 'series',
-          },
-        },
-        {
-          name: 'Maxsus kuch mashqlari',
-          type: 'line',
-          data: maxsusHours,
-          yAxisIndex: 1,
-          smooth: true,
-          lineStyle: { width: 2 },
-          itemStyle: { color: '#a855f7' },
-          symbol: 'circle',
-          symbolSize: 6,
-          showSymbol: false,
-          emphasis: {
-            focus: 'series',
+          itemStyle: {
+            borderRadius: 2,
+            borderWidth: 1,
+            borderColor: '#fff',
           },
         },
       ],

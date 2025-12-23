@@ -2,12 +2,11 @@ import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { WorkloadService } from '../../services/workload.service';
 import { WorkloadLineChartComponent } from '../../shared/components/workload-line-chart';
 import { WorkloadPieChartComponent } from '../../shared/components/workload-pie-chart';
-import { BinaryHeatmapChartComponent } from '../../shared/components/binary-heatmap-chart';
 
 @Component({
   selector: 'app-dashboard',
   changeDetection: ChangeDetectionStrategy.OnPush,
-  imports: [WorkloadLineChartComponent, WorkloadPieChartComponent, BinaryHeatmapChartComponent],
+  imports: [WorkloadLineChartComponent, WorkloadPieChartComponent],
   template: `
     <div class="min-h-screen bg-gray-50 p-6">
       <header class="mb-6">
@@ -43,20 +42,10 @@ import { BinaryHeatmapChartComponent } from '../../shared/components/binary-heat
         <app-workload-line-chart [data]="selectedGroup().data" />
       </section>
 
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <section class="rounded-lg bg-white p-4 shadow">
-          <h2 class="mb-2 text-lg font-semibold text-gray-800">Yuklama taqsimoti</h2>
-          <app-workload-pie-chart [data]="selectedGroup().data" />
-        </section>
-
-        <section class="rounded-lg bg-white p-4 shadow">
-          <h2 class="mb-2 text-lg font-semibold text-gray-800">Sport va Maxsus faoliyat</h2>
-          <app-binary-heatmap-chart
-            [sport]="selectedGroup().data.sport"
-            [maxsus]="selectedGroup().data.maxsus"
-          />
-        </section>
-      </div>
+      <section class="rounded-lg bg-white p-4 shadow">
+        <h2 class="mb-2 text-lg font-semibold text-gray-800">Yuklama taqsimoti</h2>
+        <app-workload-pie-chart [data]="selectedGroup().data" />
+      </section>
     </div>
   `,
 })
