@@ -47,7 +47,7 @@ export class WorkloadPieChartComponent {
         {
           name: 'Yuklama taqsimoti',
           type: 'pie',
-          radius: ['40%', '70%'],
+          radius: ['30%', '70%'],
           center: ['40%', '50%'],
           avoidLabelOverlap: true,
           itemStyle: {
@@ -57,7 +57,12 @@ export class WorkloadPieChartComponent {
           },
           label: {
             show: true,
-            formatter: '{b}: {d}%',
+            formatter: (params) => {
+              console.log(params)
+              const percent = params!.percent!;
+              const value = (params!.data as any).value;
+              return `${params.name}\n${percent.toFixed(1)}% (${value!.toFixed(1)} km)`;
+            }
           },
           emphasis: {
             label: {
