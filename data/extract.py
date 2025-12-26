@@ -1,4 +1,4 @@
-with open("stg-3.txt", 'r', encoding='utf-8') as infile:
+with open("stg-2.txt", 'r', encoding='utf-8') as infile:
   lines = infile.read().split('\n')
   aerob = []
   aralash = []
@@ -28,7 +28,7 @@ with open("stg-3.txt", 'r', encoding='utf-8') as infile:
         maxsus.append(0)
     i += 1
 
-  with open("stg-3.ts", 'w', encoding='utf-8') as outfile:
+  with open("stg-2.ts", 'w', encoding='utf-8') as outfile:
     outfile.write(f"export const aerob: number[] = {aerob};\n")
     outfile.write(f"export const aralash: number[] = {aralash};\n")
     outfile.write(f"export const anaerob: number[] = {anaerob};\n")
